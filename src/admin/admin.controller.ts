@@ -2,11 +2,24 @@ import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@
 import { AdminService } from './admin.service';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-list-categories-token.entity';
+import { Setting } from './entities/setting.entity';
 
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  // Setting endpoints
+  @Get('setting')
+  async getSetting(): Promise<Setting> {
+    return this.adminService.getSetting();
+  }
+
+  @Put('setting')
+  async updateSetting(@Body() data: Partial<Setting>): Promise<Setting> {
+    return this.adminService.updateSetting(data);
+  }
+
+  // Category endpoints
   @Get('categories')
   async getAllCategories(): Promise<CategoryResponseDto[]> {
     return this.adminService.getAllCategories();
