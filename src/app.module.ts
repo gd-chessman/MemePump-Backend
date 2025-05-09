@@ -25,6 +25,7 @@ import { OnChainModule } from './on-chain/on-chain.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { CacheModule } from './cache/cache.module';
 import { ChatsModule } from './chats/chats.module';
+import { AdminModule } from './admin/admin.module';
 //import { ThrottlerModule } from '@nestjs/throttler';
 //import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
 
@@ -45,12 +46,9 @@ initializeTransactionalContext();
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      synchronize: false,
+      synchronize: true,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       extra: {
-        ssl: {
-          rejectUnauthorized: false,
-        },
         timezone: 'UTC',
       }
     }),  
@@ -77,7 +75,8 @@ initializeTransactionalContext();
     SolanaTokensModule,
     EventEmitterModule.forRoot(),
     WebSocketModule,
-    ChatsModule
+    ChatsModule,
+    AdminModule,
     // ThrottlerModule.forRoot({
     //   throttlers: [{
     //     ttl: 60, // 1 phút
