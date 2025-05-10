@@ -121,8 +121,15 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     private getOnlineStats() {
+        // Tạo Map để theo dõi số lượng tab của mỗi người dùng
+        const userTabs = new Map<string, number>();
+        for (const wallet of this.connectedWallets.values()) {
+            const userKey = `${wallet.ip}-${wallet.device.browser}-${wallet.device.os}-${wallet.device.device}`;
+            userTabs.set(userKey, (userTabs.get(userKey) || 0) + 1);
+        }
+
         const stats = {
-            total: this.connectedWallets.size,
+            total: userTabs.size, // Số lượng người dùng thực sự
             master: 0,
             member: 0,
             vip: 0,
@@ -140,23 +147,21 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 walletStream: data.walletStream,
                 device: data.device,
                 ip: data.ip,
-                lastActive: data.lastActive
+                lastActive: data.lastActive,
+                tabsCount: userTabs.get(`${data.ip}-${data.device.browser}-${data.device.os}-${data.device.device}`) || 1
             }))
         };
 
-        // Đếm số lượng theo loại wallet
         for (const wallet of this.connectedWallets.values()) {
             if (wallet.walletAuth === 'master') stats.master++;
             if (wallet.walletAuth === 'member') stats.member++;
             if (wallet.walletStream === 'vip') stats.vip++;
             if (wallet.walletStream === 'normal') stats.normal++;
 
-            // Thống kê thiết bị
             stats.devices.browsers[wallet.device.browser] = (stats.devices.browsers[wallet.device.browser] || 0) + 1;
             stats.devices.os[wallet.device.os] = (stats.devices.os[wallet.device.os] || 0) + 1;
             stats.devices.deviceTypes[wallet.device.device] = (stats.devices.deviceTypes[wallet.device.device] || 0) + 1;
             
-            // Thống kê IP
             stats.ips[wallet.ip] = (stats.ips[wallet.ip] || 0) + 1;
         }
 
