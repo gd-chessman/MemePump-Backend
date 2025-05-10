@@ -224,15 +224,12 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 if (roles.walletStream === 'vip') stats.vip++;
                 if (roles.walletStream === 'normal') stats.normal++;
             }
-        }
 
-        // Đếm thông tin thiết bị và IP
-        for (const wallet of this.connectedWallets.values()) {
-            stats.devices.browsers[wallet.device.browser] = (stats.devices.browsers[wallet.device.browser] || 0) + 1;
-            stats.devices.os[wallet.device.os] = (stats.devices.os[wallet.device.os] || 0) + 1;
-            stats.devices.deviceTypes[wallet.device.device] = (stats.devices.deviceTypes[wallet.device.device] || 0) + 1;
-            
-            stats.ips[wallet.ip] = (stats.ips[wallet.ip] || 0) + 1;
+            // Đếm thiết bị dựa trên người dùng thực sự
+            stats.devices.browsers[browser] = (stats.devices.browsers[browser] || 0) + 1;
+            stats.devices.os[os] = (stats.devices.os[os] || 0) + 1;
+            stats.devices.deviceTypes[device] = (stats.devices.deviceTypes[device] || 0) + 1;
+            stats.ips[ip] = (stats.ips[ip] || 0) + 1;
         }
 
         return stats;
