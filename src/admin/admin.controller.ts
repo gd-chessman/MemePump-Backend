@@ -1,12 +1,20 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query, UseGuards, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminService } from './admin.service';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-list-categories-token.entity';
 import { Setting } from './entities/setting.entity';
+import { AdminGateway } from './admin.gateway';
 
+@ApiTags('admin')
 @Controller('admin')
+// @UseGuards(JwtAuthGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly adminGateway: AdminGateway
+  ) {}
 
   // Setting endpoints
   @Get('setting')
@@ -59,5 +67,12 @@ export class AdminController {
   @Delete('categories-token/:id')
   async deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.adminService.deleteCategory(id);
+  }
+
+  @Get('online-stats')
+  @ApiOperation({ summary: 'Get online users statistics' })
+  @ApiResponse({ status: 200, description: 'Returns online users statistics' })
+  async getOnlineStats() {
+    return this.adminGateway.handleGetOnlineStats();
   }
 }
