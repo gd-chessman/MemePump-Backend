@@ -123,9 +123,22 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private getOnlineStats() {
         // Tạo Map để theo dõi số lượng tab của mỗi người dùng
         const userTabs = new Map<string, number>();
+        const userRoles = new Map<string, {
+            walletAuth: string,
+            walletStream: string
+        }>();
+
         for (const wallet of this.connectedWallets.values()) {
             const userKey = `${wallet.ip}-${wallet.device.browser}-${wallet.device.os}-${wallet.device.device}`;
             userTabs.set(userKey, (userTabs.get(userKey) || 0) + 1);
+            
+            // Lưu role của người dùng (lấy từ kết nối đầu tiên)
+            if (!userRoles.has(userKey)) {
+                userRoles.set(userKey, {
+                    walletAuth: wallet.walletAuth,
+                    walletStream: wallet.walletStream
+                });
+            }
         }
 
         const stats = {
@@ -134,6 +147,7 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
             member: 0,
             vip: 0,
             normal: 0,
+            anonymous: 0, // Thêm đếm người dùng không có walletId
             devices: {
                 browsers: {} as Record<string, number>,
                 os: {} as Record<string, number>,
@@ -152,12 +166,21 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
             }))
         };
 
-        for (const wallet of this.connectedWallets.values()) {
-            if (wallet.walletAuth === 'master') stats.master++;
-            if (wallet.walletAuth === 'member') stats.member++;
-            if (wallet.walletStream === 'vip') stats.vip++;
-            if (wallet.walletStream === 'normal') stats.normal++;
+        // Đếm số lượng người dùng thực sự cho mỗi role
+        for (const [userKey, roles] of userRoles.entries()) {
+            if (roles.walletAuth === 'guest') {
+                stats.anonymous++; // Đếm người dùng không có walletId
+            } else {
+                // Chỉ đếm các role khác nếu không phải là guest
+                if (roles.walletAuth === 'master') stats.master++;
+                if (roles.walletAuth === 'member') stats.member++;
+                if (roles.walletStream === 'vip') stats.vip++;
+                if (roles.walletStream === 'normal') stats.normal++;
+            }
+        }
 
+        // Đếm thông tin thiết bị và IP
+        for (const wallet of this.connectedWallets.values()) {
             stats.devices.browsers[wallet.device.browser] = (stats.devices.browsers[wallet.device.browser] || 0) + 1;
             stats.devices.os[wallet.device.os] = (stats.devices.os[wallet.device.os] || 0) + 1;
             stats.devices.deviceTypes[wallet.device.device] = (stats.devices.deviceTypes[wallet.device.device] || 0) + 1;
