@@ -147,7 +147,24 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
             member: 0,
             vip: 0,
             normal: 0,
-            anonymous: 0, // Thêm đếm người dùng không có walletId
+            anonymous: 0,
+            userTabs: {} as Record<string, {
+                tabsCount: number,
+                walletAuth: string,
+                walletStream: string,
+                device: {
+                    browser: string,
+                    os: string,
+                    device: string
+                },
+                ip: string,
+                lastActive: number,
+                connections: Array<{
+                    clientId: string,
+                    walletId: number,
+                    lastActive: number
+                }>
+            }>,
             devices: {
                 browsers: {} as Record<string, number>,
                 os: {} as Record<string, number>,
@@ -168,10 +185,40 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         // Đếm số lượng người dùng thực sự cho mỗi role
         for (const [userKey, roles] of userRoles.entries()) {
+            const tabCount = userTabs.get(userKey) || 1;
+            const [ip, browser, os, device] = userKey.split('-');
+            
+            // Tìm tất cả các kết nối của người dùng này
+            const userConnections = Array.from(this.connectedWallets.entries())
+                .filter(([_, data]) => 
+                    data.ip === ip && 
+                    data.device.browser === browser && 
+                    data.device.os === os && 
+                    data.device.device === device
+                )
+                .map(([clientId, data]) => ({
+                    clientId,
+                    walletId: data.walletId,
+                    lastActive: data.lastActive
+                }));
+
+            stats.userTabs[userKey] = {
+                tabsCount: tabCount,
+                walletAuth: roles.walletAuth,
+                walletStream: roles.walletStream,
+                device: {
+                    browser,
+                    os,
+                    device
+                },
+                ip,
+                lastActive: Math.max(...userConnections.map(conn => conn.lastActive)),
+                connections: userConnections
+            };
+            
             if (roles.walletAuth === 'guest') {
-                stats.anonymous++; // Đếm người dùng không có walletId
+                stats.anonymous++;
             } else {
-                // Chỉ đếm các role khác nếu không phải là guest
                 if (roles.walletAuth === 'master') stats.master++;
                 if (roles.walletAuth === 'member') stats.member++;
                 if (roles.walletStream === 'vip') stats.vip++;
