@@ -17,7 +17,7 @@ async function bootstrap() {
 
   // Set global prefix
   app.setGlobalPrefix('api/v1', {
-    exclude: ['/'],
+    exclude: ['/', 'admin/*'],
   });
 
   const corsConfig = {
