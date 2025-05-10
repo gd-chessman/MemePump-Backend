@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-list-categories-token.entity';
@@ -15,17 +15,25 @@ export class AdminController {
   }
 
   @Put('setting')
-  async updateSetting(@Body() data: Partial<Setting>): Promise<Setting> {
+  async updateSetting(
+    @Body() data: {
+      appName?: string;
+      logo?: string;
+    }
+  ): Promise<Setting> {
     return this.adminService.updateSetting(data);
   }
 
   // Category endpoints
-  @Get('categories')
-  async getAllCategories(): Promise<CategoryResponseDto[]> {
-    return this.adminService.getAllCategories();
+  @Get('categories-token')
+  async getAllCategories(
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 100
+  ): Promise<{ data: CategoryResponseDto[]; total: number; page: number; limit: number }> {
+    return this.adminService.getAllCategories(page, limit);
   }
 
-  @Post('categories')
+  @Post('categories-token')
   async createCategory(
     @Body() data: {
       slct_name: string;
@@ -37,7 +45,7 @@ export class AdminController {
     return this.adminService.createCategory(data);
   }
 
-  @Put('categories/:id')
+  @Put('categories-token/:id')
   async updateCategory(
     @Param('id', ParseIntPipe) id: number,
     @Body() data: {
@@ -50,7 +58,7 @@ export class AdminController {
     return this.adminService.updateCategory(id, data);
   }
 
-  @Delete('categories/:id')
+  @Delete('categories-token/:id')
   async deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.adminService.deleteCategory(id);
   }

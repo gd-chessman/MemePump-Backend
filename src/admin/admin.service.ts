@@ -46,23 +46,45 @@ export class AdminService implements OnModuleInit {
     return setting;
   }
 
-  async updateSetting(data: Partial<Setting>): Promise<Setting> {
+  async updateSetting(data: {
+    appName?: string;
+    logo?: string;
+  }): Promise<Setting> {
     const setting = await this.settingRepository.findOne({ where: {} });
     if (!setting) {
       throw new NotFoundException('Setting not found');
     }
 
-    Object.assign(setting, data);
+    if (data.appName !== undefined) {
+      setting.appName = data.appName;
+    }
+    if (data.logo !== undefined) {
+      setting.logo = data.logo;
+    }
+
     return this.settingRepository.save(setting);
   }
 
-  async getAllCategories(): Promise<CategoryResponseDto[]> {
-    const categories = await this.categoriesRepository.find({
+  async getAllCategories(
+    page: number = 1,
+    limit: number = 100
+  ): Promise<{ data: CategoryResponseDto[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    
+    const [categories, total] = await this.categoriesRepository.findAndCount({
       order: {
         slct_created_at: 'DESC'
-      }
+      },
+      skip,
+      take: limit
     });
-    return categories;
+
+    return {
+      data: categories,
+      total,
+      page,
+      limit
+    };
   }
 
   async createCategory(data: {
