@@ -37,9 +37,7 @@ export class AdminController {
   async createCategory(
     @Body() data: {
       slct_name: string;
-      slct_slug?: string;
-      slct_prioritize?: CategoryPrioritize;
-      sltc_status?: CategoryStatus;
+      slct_slug: string;
     }
   ): Promise<CategoryResponseDto> {
     return this.adminService.createCategory(data);
