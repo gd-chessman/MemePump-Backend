@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query, UseGuards, Request, Res, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminService } from './admin.service';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-list-categories-token.entity';
@@ -19,6 +18,46 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly adminGateway: AdminGateway
   ) {}
+
+  // @Post('register')
+  // register(@Body() registerDto: RegisterDto) {
+  //   return this.adminService.register(registerDto);
+  // }
+
+  @Post('login')
+  @HttpCode(200)
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    return this.adminService.login(loginDto, response);
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  async logout(@Res({ passthrough: true }) response: Response) {
+    return this.adminService.logout(response);
+  }
+
+  @UseGuards(JwtAuthAdminGuard)
+  @Get('me')
+  getProfile(@Request() req) {
+    return req.user;
+  }
+
+  @UseGuards(JwtAuthAdminGuard)
+  @Post('change-password')
+  @HttpCode(200)
+  async changePassword(
+    @Request() req,
+    @Body() changePasswordDto: ChangePasswordDto
+  ) {
+    return this.adminService.changePassword(
+      req.user.username,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword
+    );
+  }
 
   // Setting endpoints
   @Get('setting')
@@ -80,44 +119,5 @@ export class AdminController {
   async getOnlineStats() {
     return this.adminGateway.handleGetOnlineStats();
   }
-
-  // @Post('register')
-  // register(@Body() registerDto: RegisterDto) {
-  //   return this.adminService.register(registerDto);
-  // }
-
-  @Post('login')
-  @HttpCode(200)
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response
-  ) {
-    return this.adminService.login(loginDto, response);
-  }
-
-  @Post('logout')
-  @HttpCode(200)
-  async logout(@Res({ passthrough: true }) response: Response) {
-    return this.adminService.logout(response);
-  }
-
-  @UseGuards(JwtAuthAdminGuard)
-  @Get('me')
-  getProfile(@Request() req) {
-    return req.user;
-  }
-
-  @UseGuards(JwtAuthAdminGuard)
-  @Post('change-password')
-  @HttpCode(200)
-  async changePassword(
-    @Request() req,
-    @Body() changePasswordDto: ChangePasswordDto
-  ) {
-    return this.adminService.changePassword(
-      req.user.username,
-      changePasswordDto.currentPassword,
-      changePasswordDto.newPassword
-    );
-  }
+ 
 }
