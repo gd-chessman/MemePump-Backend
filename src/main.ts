@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 import { ServerOptions } from 'socket.io';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -33,6 +34,9 @@ async function bootstrap() {
 
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
+
+  // Use cookie parser
+  app.use(cookieParser());
 
   // Configure WebSocket with custom adapter
   class CustomIoAdapter extends IoAdapter {

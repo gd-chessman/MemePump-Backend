@@ -10,8 +10,10 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
   constructor(private readonly adminService: AdminService) {
     super({
       jwtFromRequest: (req: Request) => {
-        const token = req.cookies['access_token'];
-        return token ? token : null;
+        if (req && req.cookies) {
+          return req.cookies['access_token'] || null;
+        }
+        return null;
       },
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'your-secret-key',

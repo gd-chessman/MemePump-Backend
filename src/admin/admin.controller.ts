@@ -21,7 +21,7 @@ export class AdminController {
 
   // Setting endpoints
   @Get('setting')
-  // @UseGuards(JwtAuthAdminGuard)
+  @UseGuards(JwtAuthAdminGuard)
   async getSetting(): Promise<Setting> {
     return this.adminService.getSetting();
   }
