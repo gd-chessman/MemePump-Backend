@@ -238,4 +238,22 @@ export class AdminService implements OnModuleInit {
     }
     return user;
   }
+
+  async changePassword(username: string, currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    const user = await this.userAdminRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedNewPassword;
+    await this.userAdminRepository.save(user);
+
+    return { message: 'Password changed successfully' };
+  }
 }

@@ -7,6 +7,7 @@ import { CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-li
 import { Setting } from './entities/setting.entity';
 import { AdminGateway } from './admin.gateway';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { Response } from 'express';
 import { JwtAuthAdminGuard } from './guards/jwt-auth.guard';
 
@@ -104,5 +105,19 @@ export class AdminController {
   @Get('me')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @UseGuards(JwtAuthAdminGuard)
+  @Post('change-password')
+  @HttpCode(200)
+  async changePassword(
+    @Request() req,
+    @Body() changePasswordDto: ChangePasswordDto
+  ) {
+    return this.adminService.changePassword(
+      req.user.username,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword
+    );
   }
 }
