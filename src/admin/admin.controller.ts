@@ -34,6 +34,7 @@ export class AdminController {
     return this.adminService.login(loginDto, response);
   }
 
+  @UseGuards(JwtAuthAdminGuard)
   @Post('logout')
   @HttpCode(200)
   async logout(@Res({ passthrough: true }) response: Response) {
@@ -61,12 +62,13 @@ export class AdminController {
   }
 
   // Setting endpoints
-  @Get('setting')
   @UseGuards(JwtAuthAdminGuard)
+  @Get('setting')
   async getSetting(): Promise<Setting> {
     return this.adminService.getSetting();
   }
 
+  @UseGuards(JwtAuthAdminGuard)
   @Put('setting')
   async updateSetting(
     @Body() data: {
@@ -78,6 +80,7 @@ export class AdminController {
   }
 
   // Category endpoints
+  @UseGuards(JwtAuthAdminGuard)
   @Get('categories-token')
   async getAllCategories(
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
@@ -86,6 +89,7 @@ export class AdminController {
     return this.adminService.getAllCategories(page, limit);
   }
 
+  @UseGuards(JwtAuthAdminGuard)
   @Post('categories-token')
   async createCategory(
     @Body() data: {
@@ -96,6 +100,7 @@ export class AdminController {
     return this.adminService.createCategory(data);
   }
 
+  @UseGuards(JwtAuthAdminGuard)
   @Put('categories-token/:id')
   async updateCategory(
     @Param('id', ParseIntPipe) id: number,
@@ -109,11 +114,13 @@ export class AdminController {
     return this.adminService.updateCategory(id, data);
   }
 
+  @UseGuards(JwtAuthAdminGuard)
   @Delete('categories-token/:id')
   async deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.adminService.deleteCategory(id);
   }
 
+  @UseGuards(JwtAuthAdminGuard)
   @Get('online-stats')
   @ApiOperation({ summary: 'Get online users statistics' })
   @ApiResponse({ status: 200, description: 'Returns online users statistics' })
@@ -121,8 +128,8 @@ export class AdminController {
     return this.adminGateway.handleGetOnlineStats();
   }
 
-  @Get('user-wallets')
   @UseGuards(JwtAuthAdminGuard)
+  @Get('user-wallets')
   @ApiOperation({ summary: 'Get list of user wallets' })
   @ApiResponse({ status: 200, description: 'Returns list of user wallets with pagination' })
   async getUserWallets(
