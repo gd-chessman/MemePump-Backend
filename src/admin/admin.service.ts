@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { UserAdmin } from './entities/user-admin.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { AdminRole } from './entities/user-admin.entity';
+import { Response } from 'express';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -188,7 +189,7 @@ export class AdminService implements OnModuleInit {
     return this.userAdminRepository.save(user);
   }
 
-  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
+  async login(loginDto: LoginDto, response: Response): Promise<{ id: number; username: string; email: string; role: AdminRole }> {
     const { username, password } = loginDto;
 
     // Find user
@@ -212,10 +213,28 @@ export class AdminService implements OnModuleInit {
       username: user.username,
       role: user.role 
     };
+    const token = this.jwtService.sign(payload);
 
+    // Set HTTP-only cookie
+    response.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+    // Return user data without password
     return {
-      access_token: this.jwtService.sign(payload),
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role
     };
+  }
+
+  async logout(response: Response): Promise<{ message: string }> {
+    response.clearCookie('access_token');
+    return { message: 'Logged out successfully' };
   }
 
   async validateUser(id: number): Promise<UserAdmin> {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query, UseGuards, Request, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminService } from './admin.service';
@@ -7,6 +7,7 @@ import { CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-li
 import { Setting } from './entities/setting.entity';
 import { AdminGateway } from './admin.gateway';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { Response } from 'express';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -83,8 +84,16 @@ export class AdminController {
   }
 
   @Post('login')
-  login(@Body() loginDto: LoginDto) {
-    return this.adminService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    return this.adminService.login(loginDto, response);
+  }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) response: Response) {
+    return this.adminService.logout(response);
   }
 
   @UseGuards(JwtAuthGuard)
