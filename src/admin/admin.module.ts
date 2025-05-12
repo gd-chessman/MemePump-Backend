@@ -10,10 +10,11 @@ import { SolanaListCategoriesToken } from '../solana/entities/solana-list-catego
 import { Setting } from './entities/setting.entity';
 import { UserAdmin } from './entities/user-admin.entity';
 import { AdminJwtStrategy } from './strategies/jwt.strategy';
+import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ListWallet, SolanaListCategoriesToken, Setting, UserAdmin]),
+    TypeOrmModule.forFeature([ListWallet, SolanaListCategoriesToken, Setting, UserAdmin, UserWallet]),
     PassportModule.register({ defaultStrategy: 'admin-jwt' }),
     JwtModule.register({
       secret: 'your-secret-key',

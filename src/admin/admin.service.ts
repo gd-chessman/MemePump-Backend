@@ -11,6 +11,7 @@ import { UserAdmin } from './entities/user-admin.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { AdminRole } from './entities/user-admin.entity';
 import { Response } from 'express';
+import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -21,6 +22,8 @@ export class AdminService implements OnModuleInit {
     private settingRepository: Repository<Setting>,
     @InjectRepository(UserAdmin)
     private userAdminRepository: Repository<UserAdmin>,
+    @InjectRepository(UserWallet)
+    private userWalletRepository: Repository<UserWallet>,
     private jwtService: JwtService,
   ) {}
 
@@ -255,5 +258,28 @@ export class AdminService implements OnModuleInit {
     await this.userAdminRepository.save(user);
 
     return { message: 'Password changed successfully' };
+  }
+
+  async getUserWallets(
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{ data: UserWallet[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    
+    const [wallets, total] = await this.userWalletRepository.findAndCount({
+      relations: ['wallet_auths'],
+      order: {
+        uw_id: 'DESC'
+      },
+      skip,
+      take: limit
+    });
+
+    return {
+      data: wallets,
+      total,
+      page,
+      limit
+    };
   }
 }

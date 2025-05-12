@@ -9,6 +9,7 @@ import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Response } from 'express';
 import { JwtAuthAdminGuard } from './guards/jwt-auth.guard';
+import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -119,5 +120,15 @@ export class AdminController {
   async getOnlineStats() {
     return this.adminGateway.handleGetOnlineStats();
   }
- 
+
+  @Get('user-wallets')
+  @UseGuards(JwtAuthAdminGuard)
+  @ApiOperation({ summary: 'Get list of user wallets' })
+  @ApiResponse({ status: 200, description: 'Returns list of user wallets with pagination' })
+  async getUserWallets(
+    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10
+  ): Promise<{ data: UserWallet[]; total: number; page: number; limit: number }> {
+    return this.adminService.getUserWallets(page, limit);
+  }
 }
