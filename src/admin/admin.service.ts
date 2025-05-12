@@ -4,11 +4,12 @@ import { Repository } from 'typeorm';
 import { SolanaListCategoriesToken, CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-list-categories-token.entity';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { Setting } from './entities/setting.entity';
-import { DEFAULT_SETTING } from './constants';
+import { DEFAULT_SETTING, DEFAULT_USER_ADMIN } from './constants';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserAdmin } from './entities/user-admin.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { AdminRole } from './entities/user-admin.entity';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -24,6 +25,7 @@ export class AdminService implements OnModuleInit {
 
   async onModuleInit() {
     await this.initializeDefaultSetting();
+    await this.initializeDefaultAdmin();
   }
 
   private async initializeDefaultSetting() {
@@ -41,6 +43,21 @@ export class AdminService implements OnModuleInit {
       await this.settingRepository.save({
         appName: DEFAULT_SETTING.appName,
         logo: DEFAULT_SETTING.logo
+      });
+    }
+  }
+
+  private async initializeDefaultAdmin() {
+    const adminCount = await this.userAdminRepository.count();
+    
+    if (adminCount === 0) {
+      const hashedPassword = await bcrypt.hash(DEFAULT_USER_ADMIN.password, 10);
+      
+      await this.userAdminRepository.save({
+        username: DEFAULT_USER_ADMIN.username,
+        email: DEFAULT_USER_ADMIN.email,
+        password: hashedPassword,
+        role: AdminRole.ADMIN
       });
     }
   }
@@ -144,6 +161,17 @@ export class AdminService implements OnModuleInit {
 
     if (existingUser) {
       throw new ConflictException('Username or email already exists');
+    }
+
+    // If trying to register as ADMIN, check if admin already exists
+    if (role === AdminRole.ADMIN) {
+      const adminExists = await this.userAdminRepository.findOne({
+        where: { role: AdminRole.ADMIN }
+      });
+
+      if (adminExists) {
+        throw new ConflictException('Admin account already exists');
+      }
     }
 
     // Hash password
