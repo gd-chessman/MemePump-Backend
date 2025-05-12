@@ -80,10 +80,10 @@ export class AdminController {
     return this.adminGateway.handleGetOnlineStats();
   }
 
-  @Post('register')
-  register(@Body() registerDto: RegisterDto) {
-    return this.adminService.register(registerDto);
-  }
+  // @Post('register')
+  // register(@Body() registerDto: RegisterDto) {
+  //   return this.adminService.register(registerDto);
+  // }
 
   @Post('login')
   @HttpCode(200)
@@ -100,8 +100,8 @@ export class AdminController {
     return this.adminService.logout(response);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
+  @UseGuards(JwtAuthAdminGuard)
+  @Get('me')
   getProfile(@Request() req) {
     return req.user;
   }
