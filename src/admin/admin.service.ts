@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SolanaListCategoriesToken, CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-list-categories-token.entity';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { Setting } from './entities/setting.entity';
 import { DEFAULT_SETTING } from './constants';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { UserAdmin } from './entities/user-admin.entity';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -13,6 +17,9 @@ export class AdminService implements OnModuleInit {
     private categoriesRepository: Repository<SolanaListCategoriesToken>,
     @InjectRepository(Setting)
     private settingRepository: Repository<Setting>,
+    @InjectRepository(UserAdmin)
+    private userAdminRepository: Repository<UserAdmin>,
+    private jwtService: JwtService,
   ) {}
 
   async onModuleInit() {
@@ -125,5 +132,69 @@ export class AdminService implements OnModuleInit {
     }
 
     await this.categoriesRepository.remove(category);
+  }
+
+  async register(registerDto: RegisterDto): Promise<UserAdmin> {
+    const { username, email, password, role } = registerDto;
+
+    // Check if username or email already exists
+    const existingUser = await this.userAdminRepository.findOne({
+      where: [{ username }, { email }],
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Username or email already exists');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new user
+    const user = this.userAdminRepository.create({
+      username,
+      email,
+      password: hashedPassword,
+      role,
+    });
+
+    return this.userAdminRepository.save(user);
+  }
+
+  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
+    const { username, password } = loginDto;
+
+    // Find user
+    const user = await this.userAdminRepository.findOne({
+      where: { username },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Generate JWT token
+    const payload = { 
+      sub: user.id, 
+      username: user.username,
+      role: user.role 
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async validateUser(id: number): Promise<UserAdmin> {
+    const user = await this.userAdminRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return user;
   }
 }

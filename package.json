@@ -52,6 +52,7 @@
     "@types/async": "^3.2.24",
     "async": "^3.2.6",
     "axios": "^1.8.4",
+    "bcrypt": "^6.0.0",
     "bs58": "^6.0.0",
     "cache-manager": "^6.4.1",
     "cache-manager-redis-store": "^3.0.1",

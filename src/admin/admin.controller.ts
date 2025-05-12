@@ -6,6 +6,7 @@ import { CategoryResponseDto } from './dto/category-response.dto';
 import { CategoryPrioritize, CategoryStatus } from '../solana/entities/solana-list-categories-token.entity';
 import { Setting } from './entities/setting.entity';
 import { AdminGateway } from './admin.gateway';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -74,5 +75,21 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Returns online users statistics' })
   async getOnlineStats() {
     return this.adminGateway.handleGetOnlineStats();
+  }
+
+  @Post('register')
+  register(@Body() registerDto: RegisterDto) {
+    return this.adminService.register(registerDto);
+  }
+
+  @Post('login')
+  login(@Body() loginDto: LoginDto) {
+    return this.adminService.login(loginDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 }
