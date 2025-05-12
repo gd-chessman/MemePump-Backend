@@ -8,6 +8,7 @@ import { Setting } from './entities/setting.entity';
 import { AdminGateway } from './admin.gateway';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { Response } from 'express';
+import { JwtAuthAdminGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -20,6 +21,7 @@ export class AdminController {
 
   // Setting endpoints
   @Get('setting')
+  // @UseGuards(JwtAuthAdminGuard)
   async getSetting(): Promise<Setting> {
     return this.adminService.getSetting();
   }

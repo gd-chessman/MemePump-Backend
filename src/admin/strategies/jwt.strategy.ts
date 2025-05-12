@@ -1,24 +1,25 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AdminService } from '../admin.service';
+import { UserAdmin } from '../entities/user-admin.entity';
+import { Request } from 'express';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private adminService: AdminService) {
+export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
+  constructor(private readonly adminService: AdminService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: (req: Request) => {
+        const token = req.cookies['access_token'];
+        return token ? token : null;
+      },
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: any): Promise<UserAdmin> {
     const user = await this.adminService.validateUser(payload.sub);
-    return {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-    };
+    return user;
   }
 } 
