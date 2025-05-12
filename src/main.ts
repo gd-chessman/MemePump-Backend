@@ -24,7 +24,7 @@ async function bootstrap() {
   const corsConfig = {
     origin: process.env.NODE_ENV === 'production'
       ? ['https://memepump.gg', 'https://www.memepump.gg', 'https://memepump.vip']
-      : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8000'],
+      : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8000', 'http://localhost:3600'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-No-Redirect', 'token', 'Access-Control-Allow-Origin'],
     credentials: true
