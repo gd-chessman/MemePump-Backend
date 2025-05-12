@@ -16,7 +16,7 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
         return null;
       },
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
+      secretOrKey: 'your-secret-key',
     });
   }
 

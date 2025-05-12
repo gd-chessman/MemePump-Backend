@@ -231,8 +231,8 @@ export class AdminService implements OnModuleInit {
     return { message: 'Logged out successfully' };
   }
 
-  async validateUser(id: number): Promise<UserAdmin> {
-    const user = await this.userAdminRepository.findOne({ where: { id } });
+  async validateUser(username: string): Promise<UserAdmin> {
+    const user = await this.userAdminRepository.findOne({ where: { username } });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
