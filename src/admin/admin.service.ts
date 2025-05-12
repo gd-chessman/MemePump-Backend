@@ -189,7 +189,7 @@ export class AdminService implements OnModuleInit {
     return this.userAdminRepository.save(user);
   }
 
-  async login(loginDto: LoginDto, response: Response): Promise<{ id: number; username: string; email: string; role: AdminRole }> {
+  async login(loginDto: LoginDto, response: Response): Promise<{ message: string }> {
     const { username, password } = loginDto;
 
     // Find user
@@ -223,13 +223,7 @@ export class AdminService implements OnModuleInit {
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
 
-    // Return user data without password
-    return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role
-    };
+    return { message: 'Login successfully' };
   }
 
   async logout(response: Response): Promise<{ message: string }> {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query, UseGuards, Request, Res } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query, UseGuards, Request, Res, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminService } from './admin.service';
@@ -84,6 +84,7 @@ export class AdminController {
   }
 
   @Post('login')
+  @HttpCode(200)
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response
@@ -92,6 +93,7 @@ export class AdminController {
   }
 
   @Post('logout')
+  @HttpCode(200)
   async logout(@Res({ passthrough: true }) response: Response) {
     return this.adminService.logout(response);
   }
