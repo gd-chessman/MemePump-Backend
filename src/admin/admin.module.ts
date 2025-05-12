@@ -16,7 +16,7 @@ import { AdminJwtStrategy } from './strategies/jwt.strategy';
     TypeOrmModule.forFeature([ListWallet, SolanaListCategoriesToken, Setting, UserAdmin]),
     PassportModule.register({ defaultStrategy: 'admin-jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key',
+      secret: 'your-secret-key',
       signOptions: { expiresIn: '1d' },
     }),
   ],
