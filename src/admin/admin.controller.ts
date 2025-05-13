@@ -139,8 +139,9 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Returns list of user wallets with pagination' })
   async getUserWallets(
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 10
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 100,
+    @Query('search') search?: string
   ): Promise<{ data: UserWallet[]; total: number; page: number; limit: number }> {
-    return this.adminService.getUserWallets(page, limit);
+    return this.adminService.getUserWallets(page, limit, search);
   }
 }

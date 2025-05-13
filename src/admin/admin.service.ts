@@ -289,18 +289,23 @@ export class AdminService implements OnModuleInit {
 
   async getUserWallets(
     page: number = 1,
-    limit: number = 10
+    limit: number = 100,
+    search?: string
   ): Promise<{ data: UserWallet[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
     
-    const [wallets, total] = await this.userWalletRepository.findAndCount({
-      relations: ['wallet_auths'],
-      order: {
-        uw_id: 'DESC'
-      },
-      skip,
-      take: limit
-    });
+    const queryBuilder = this.userWalletRepository.createQueryBuilder('wallet')
+      .leftJoinAndSelect('wallet.wallet_auths', 'wallet_auths');
+
+    if (search) {
+      queryBuilder.where('wallet.uw_telegram_id ILIKE :search', { search: `%${search}%` });
+    }
+
+    const [wallets, total] = await queryBuilder
+      .orderBy('wallet.uw_id', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
 
     return {
       data: wallets,
