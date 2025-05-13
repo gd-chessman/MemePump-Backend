@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -11,6 +11,11 @@ import { Setting } from './entities/setting.entity';
 import { UserAdmin } from './entities/user-admin.entity';
 import { AdminJwtStrategy } from './strategies/jwt.strategy';
 import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
+import { MulterModule } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Module({
   imports: [
@@ -20,9 +25,25 @@ import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
       secret: 'your-secret-key',
       signOptions: { expiresIn: '1d' },
     }),
+    MulterModule.register({
+      storage: diskStorage({
+        destination: './src/admin/uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
   ],
   controllers: [AdminController],
   providers: [AdminService, AdminGateway, AdminJwtStrategy],
   exports: [AdminService, AdminGateway],
 })
-export class AdminModule {}
+export class AdminModule implements OnModuleInit {
+  onModuleInit() {
+    const uploadsDir = path.join(process.cwd(), 'src', 'admin', 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+  }
+}

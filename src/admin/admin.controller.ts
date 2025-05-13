@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query, UseGuards, Request, Res, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, Query, UseGuards, Request, Res, HttpCode, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { CategoryResponseDto } from './dto/category-response.dto';
@@ -11,6 +11,9 @@ import { Response } from 'express';
 import { JwtAuthAdminGuard } from './guards/jwt-auth.guard';
 import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
 import { ProfileResponseDto } from './dto/profile-response.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -73,14 +76,29 @@ export class AdminController {
 
   @UseGuards(JwtAuthAdminGuard)
   @Put('setting')
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      storage: diskStorage({
+        destination: './src/admin/uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   async updateSetting(
     @Body() data: {
       appName?: string;
-      logo?: string;
       telegramBot?: string;
-    }
+    },
+    @UploadedFile() file: any,
   ): Promise<Setting> {
-    return this.adminService.updateSetting(data);
+    const updateData = {
+      ...data,
+      logo: file ? `/admin/uploads/${file.filename}` : undefined,
+    };
+    return this.adminService.updateSetting(updateData);
   }
 
   // Category endpoints
