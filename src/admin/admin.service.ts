@@ -79,6 +79,7 @@ export class AdminService implements OnModuleInit {
   async updateSetting(data: {
     appName?: string;
     logo?: string;
+    telegramBot?: string;
   }): Promise<Setting> {
     const setting = await this.settingRepository.findOne({ where: {} });
     if (!setting) {
@@ -90,6 +91,9 @@ export class AdminService implements OnModuleInit {
     }
     if (data.logo !== undefined) {
       setting.logo = data.logo;
+    }
+    if (data.telegramBot !== undefined) {
+      setting.telegramBot = data.telegramBot;
     }
 
     return this.settingRepository.save(setting);

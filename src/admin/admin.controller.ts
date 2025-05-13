@@ -77,6 +77,7 @@ export class AdminController {
     @Body() data: {
       appName?: string;
       logo?: string;
+      telegramBot?: string;
     }
   ): Promise<Setting> {
     return this.adminService.updateSetting(data);
