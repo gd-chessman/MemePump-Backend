@@ -14,6 +14,8 @@ import { ProfileResponseDto } from './dto/profile-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -94,9 +96,20 @@ export class AdminController {
     },
     @UploadedFile() file: any,
   ): Promise<Setting> {
+    // Get current settings to check for existing logo
+    const currentSettings = await this.adminService.getSetting();
+    
+    // If there's a new file and an old logo exists, delete the old file
+    if (file && currentSettings?.logo) {
+      const oldLogoPath = path.join(process.cwd(), 'src', currentSettings.logo);
+      if (fs.existsSync(oldLogoPath)) {
+        fs.unlinkSync(oldLogoPath);
+      }
+    }
+
     const updateData = {
       ...data,
-      logo: file ? `/admin/uploads/${file.filename}` : undefined,
+      logo: file ? `/admin/uploads/${file.filename}` : currentSettings?.logo,
     };
     return this.adminService.updateSetting(updateData);
   }
