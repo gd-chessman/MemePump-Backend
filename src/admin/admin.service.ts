@@ -39,14 +39,16 @@ export class AdminService implements OnModuleInit {
       // Nếu chưa có dữ liệu, tạo mới với giá trị mặc định
       await this.settingRepository.save({
         appName: DEFAULT_SETTING.appName,
-        logo: DEFAULT_SETTING.logo
+        logo: DEFAULT_SETTING.logo,
+        telegramBot: DEFAULT_SETTING.telegramBot
       });
     } else if (count > 1) {
       // Nếu có nhiều hơn 1 bản ghi, xóa tất cả và tạo lại
       await this.settingRepository.clear();
       await this.settingRepository.save({
         appName: DEFAULT_SETTING.appName,
-        logo: DEFAULT_SETTING.logo
+        logo: DEFAULT_SETTING.logo,
+        telegramBot: DEFAULT_SETTING.telegramBot
       });
     }
   }

@@ -12,6 +12,9 @@ export class Setting {
   @Column({ nullable: false })
   logo: string;
 
+  @Column({ nullable: true })
+  telegramBot: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
