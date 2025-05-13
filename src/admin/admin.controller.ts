@@ -14,7 +14,6 @@ import { ProfileResponseDto } from './dto/profile-response.dto';
 
 @ApiTags('admin')
 @Controller('admin')
-// @UseGuards(JwtAuthGuard)
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
