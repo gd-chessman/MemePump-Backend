@@ -148,7 +148,19 @@ export class AdminService implements OnModuleInit {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-    Object.assign(category, data);
+    if (data.slct_name !== undefined) {
+      category.slct_name = data.slct_name;
+    }
+    if (data.slct_slug !== undefined) {
+      category.slct_slug = data.slct_slug;
+    }
+    if (data.slct_prioritize !== undefined) {
+      category.slct_prioritize = data.slct_prioritize;
+    }
+    if (data.sltc_status !== undefined) {
+      category.sltc_status = data.sltc_status;
+    }
+
     return this.categoriesRepository.save(category);
   }
 
