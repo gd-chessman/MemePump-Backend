@@ -120,7 +120,7 @@ export class AdminController {
 
   @UseGuards(JwtAuthAdminGuard)
   @Delete('categories-token/:id')
-  async deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
     return this.adminService.deleteCategory(id);
   }
 

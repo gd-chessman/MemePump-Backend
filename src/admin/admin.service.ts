@@ -152,13 +152,14 @@ export class AdminService implements OnModuleInit {
     return this.categoriesRepository.save(category);
   }
 
-  async deleteCategory(id: number): Promise<void> {
+  async deleteCategory(id: number): Promise<{ message: string }> {
     const category = await this.categoriesRepository.findOne({ where: { slct_id: id } });
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
     await this.categoriesRepository.remove(category);
+    return { message: 'Category deleted successfully' };
   }
 
   async register(registerDto: RegisterDto): Promise<UserAdmin> {
