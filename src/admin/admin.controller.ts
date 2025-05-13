@@ -81,7 +81,7 @@ export class AdminController {
   @UseInterceptors(
     FileInterceptor('logo', {
       storage: diskStorage({
-        destination: './src/admin/uploads',
+        destination: './public/uploads',
         filename: (req, file, cb) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
@@ -101,7 +101,7 @@ export class AdminController {
     
     // If there's a new file and an old logo exists, delete the old file
     if (file && currentSettings?.logo) {
-      const oldLogoPath = path.join(process.cwd(), 'src', currentSettings.logo);
+      const oldLogoPath = path.join(process.cwd(), 'public', 'uploads', path.basename(currentSettings.logo));
       if (fs.existsSync(oldLogoPath)) {
         fs.unlinkSync(oldLogoPath);
       }
@@ -109,7 +109,7 @@ export class AdminController {
 
     const updateData = {
       ...data,
-      logo: file ? `/admin/uploads/${file.filename}` : currentSettings?.logo,
+      logo: file ? `/uploads/${file.filename}` : currentSettings?.logo,
     };
     return this.adminService.updateSetting(updateData);
   }

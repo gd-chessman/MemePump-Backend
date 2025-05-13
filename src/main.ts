@@ -6,9 +6,11 @@ import { Logger } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 import { ServerOptions } from 'socket.io';
 import cookieParser from 'cookie-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'log']
   });
 
@@ -20,6 +22,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1', {
     exclude: ['/', 'admin/*'],
   });
+
+  app.useStaticAssets(join(process.cwd(), 'public'));
 
   const corsConfig = {
     origin: process.env.NODE_ENV === 'production'
