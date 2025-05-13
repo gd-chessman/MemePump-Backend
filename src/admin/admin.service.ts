@@ -298,7 +298,10 @@ export class AdminService implements OnModuleInit {
       .leftJoinAndSelect('wallet.wallet_auths', 'wallet_auths');
 
     if (search) {
-      queryBuilder.where('wallet.uw_telegram_id ILIKE :search', { search: `%${search}%` });
+      queryBuilder.where(
+        '(wallet.uw_telegram_id ILIKE :search OR CAST(wallet.uw_id AS TEXT) ILIKE :search)',
+        { search: `%${search}%` }
+      );
     }
 
     const [wallets, total] = await queryBuilder
