@@ -10,6 +10,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { Response } from 'express';
 import { JwtAuthAdminGuard } from './guards/jwt-auth.guard';
 import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
+import { ProfileResponseDto } from './dto/profile-response.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -43,8 +44,11 @@ export class AdminController {
 
   @UseGuards(JwtAuthAdminGuard)
   @Get('me')
-  getProfile(@Request() req) {
-    return req.user;
+  @ApiOperation({ summary: 'Get admin profile' })
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
+  getProfile(@Request() req): ProfileResponseDto {
+    const { password, ...profile } = req.user;
+    return profile;
   }
 
   @UseGuards(JwtAuthAdminGuard)
