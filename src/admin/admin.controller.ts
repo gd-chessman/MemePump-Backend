@@ -88,9 +88,10 @@ export class AdminController {
   @Get('categories-token')
   async getAllCategories(
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 100
+    @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 100,
+    @Query('search') search?: string
   ): Promise<{ data: CategoryResponseDto[]; total: number; page: number; limit: number }> {
-    return this.adminService.getAllCategories(page, limit);
+    return this.adminService.getAllCategories(page, limit, search);
   }
 
   @UseGuards(JwtAuthAdminGuard)

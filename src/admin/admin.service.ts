@@ -101,17 +101,25 @@ export class AdminService implements OnModuleInit {
 
   async getAllCategories(
     page: number = 1,
-    limit: number = 100
+    limit: number = 100,
+    search?: string
   ): Promise<{ data: CategoryResponseDto[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
     
-    const [categories, total] = await this.categoriesRepository.findAndCount({
-      order: {
-        slct_created_at: 'DESC'
-      },
-      skip,
-      take: limit
-    });
+    const queryBuilder = this.categoriesRepository.createQueryBuilder('category');
+
+    if (search) {
+      queryBuilder.where(
+        '(category.slct_name ILIKE :search OR category.slct_slug ILIKE :search)',
+        { search: `%${search}%` }
+      );
+    }
+
+    const [categories, total] = await queryBuilder
+      .orderBy('category.slct_created_at', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
 
     return {
       data: categories,
