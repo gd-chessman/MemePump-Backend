@@ -22,7 +22,6 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private connectedWallets = new Map<string, {
         walletId: number,
         walletAuth: string,
-        walletStream: string,
         lastActive: number,
         device: {
             browser: string,
@@ -62,7 +61,6 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     this.connectedWallets.set(client.id, {
                         walletId: wallet.wallet_id,
                         walletAuth: wallet.wallet_auth,
-                        walletStream: wallet.wallet_stream,
                         lastActive: Date.now(),
                         device: deviceInfo,
                         ip: ip
@@ -78,7 +76,6 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 this.connectedWallets.set(client.id, {
                     walletId: 0,
                     walletAuth: 'guest',
-                    walletStream: 'normal',
                     lastActive: Date.now(),
                     device: deviceInfo,
                     ip: ip
@@ -98,7 +95,6 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (wallet) {
             // Leave rooms
             client.leave(`wallet_${wallet.walletAuth}`);
-            client.leave(`stream_${wallet.walletStream}`);
         }
         
         this.connectedWallets.delete(client.id);
@@ -124,8 +120,7 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // Tạo Map để theo dõi số lượng tab của mỗi người dùng
         const userTabs = new Map<string, number>();
         const userRoles = new Map<string, {
-            walletAuth: string,
-            walletStream: string
+            walletAuth: string
         }>();
 
         for (const wallet of this.connectedWallets.values()) {
@@ -135,8 +130,7 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
             // Lưu role của người dùng (lấy từ kết nối đầu tiên)
             if (!userRoles.has(userKey)) {
                 userRoles.set(userKey, {
-                    walletAuth: wallet.walletAuth,
-                    walletStream: wallet.walletStream
+                    walletAuth: wallet.walletAuth
                 });
             }
         }
@@ -145,13 +139,10 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
             total: userTabs.size, // Số lượng người dùng thực sự
             master: 0,
             member: 0,
-            vip: 0,
-            normal: 0,
             anonymous: 0,
             userTabs: {} as Record<string, {
                 tabsCount: number,
                 walletAuth: string,
-                walletStream: string,
                 device: {
                     browser: string,
                     os: string,
@@ -175,7 +166,6 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 clientId,
                 walletId: data.walletId,
                 walletAuth: data.walletAuth,
-                walletStream: data.walletStream,
                 device: data.device,
                 ip: data.ip,
                 lastActive: data.lastActive,
@@ -205,7 +195,6 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
             stats.userTabs[userKey] = {
                 tabsCount: tabCount,
                 walletAuth: roles.walletAuth,
-                walletStream: roles.walletStream,
                 device: {
                     browser,
                     os,
@@ -221,8 +210,6 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
             } else {
                 if (roles.walletAuth === 'master') stats.master++;
                 if (roles.walletAuth === 'member') stats.member++;
-                if (roles.walletStream === 'vip') stats.vip++;
-                if (roles.walletStream === 'normal') stats.normal++;
             }
 
             // Đếm thiết bị dựa trên người dùng thực sự
