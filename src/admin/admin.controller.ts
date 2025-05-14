@@ -56,7 +56,7 @@ export class AdminController {
   }
 
   @UseGuards(JwtAuthAdminGuard)
-  @Post('change-password')
+  @Put('change-password')
   @HttpCode(200)
   async changePassword(
     @Request() req,
