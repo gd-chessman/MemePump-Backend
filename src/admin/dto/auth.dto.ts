@@ -1,11 +1,13 @@
-import { IsEmail, IsString, MinLength, IsEnum } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsEnum, IsNotEmpty } from 'class-validator';
 import { AdminRole } from '../entities/user-admin.entity';
 
 export class LoginDto {
   @IsString()
+  @IsNotEmpty()
   username: string;
 
   @IsString()
+  @IsNotEmpty()
   password: string;
 }
 
@@ -14,7 +16,7 @@ export class RegisterDto {
   username: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(4)
   password: string;
 
   @IsEmail()
