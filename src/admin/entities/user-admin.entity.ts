@@ -10,19 +10,20 @@ export class UserAdmin {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: false })
   username: string;
 
-  @Column()
+  @Column({ nullable: false })
   password: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: false })
   email: string;
 
   @Column({
     type: 'enum',
     enum: AdminRole,
-    default: AdminRole.MEMBER
+    default: AdminRole.MEMBER,
+    nullable: false
   })
   role: AdminRole;
 
