@@ -15,9 +15,6 @@ export class Setting {
   logo: string;
 
   @Column({ nullable: true })
-  favicon: string;
-
-  @Column({ nullable: true })
   @IsNotEmpty()
   telegramBot: string;
 
