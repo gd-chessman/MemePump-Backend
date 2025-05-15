@@ -295,7 +295,18 @@ export class AdminService implements OnModuleInit {
     const skip = (page - 1) * limit;
     
     const queryBuilder = this.listWalletRepository.createQueryBuilder('wallet')
-      .leftJoinAndSelect('wallet.wallet_auths', 'wallet_auths');
+      .leftJoinAndSelect('wallet.wallet_auths', 'wallet_auths')
+      .select([
+        'wallet.wallet_id',
+        'wallet.wallet_solana_address',
+        'wallet.wallet_eth_address',
+        'wallet.wallet_auth',
+        'wallet.wallet_stream',
+        'wallet.wallet_status',
+        'wallet.wallet_nick_name',
+        'wallet.wallet_country',
+        'wallet_auths'
+      ]);
 
     if (search) {
       queryBuilder.where(
