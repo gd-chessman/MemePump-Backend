@@ -9,7 +9,7 @@ import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Response } from 'express';
 import { JwtAuthAdminGuard } from './guards/jwt-auth.guard';
-import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
+import { ListWallet } from '../telegram-wallets/entities/list-wallet.entity';
 import { ProfileResponseDto } from './dto/profile-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -170,7 +170,7 @@ export class AdminController {
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 100,
     @Query('search') search?: string
-  ): Promise<{ data: UserWallet[]; total: number; page: number; limit: number }> {
+  ): Promise<{ data: ListWallet[]; total: number; page: number; limit: number }> {
     return this.adminService.getUserWallets(page, limit, search);
   }
 }

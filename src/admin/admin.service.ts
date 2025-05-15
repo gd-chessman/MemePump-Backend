@@ -11,7 +11,7 @@ import { UserAdmin } from './entities/user-admin.entity';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { AdminRole } from './entities/user-admin.entity';
 import { Response } from 'express';
-import { UserWallet } from '../telegram-wallets/entities/user-wallet.entity';
+import { ListWallet } from '../telegram-wallets/entities/list-wallet.entity';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -22,8 +22,8 @@ export class AdminService implements OnModuleInit {
     private settingRepository: Repository<Setting>,
     @InjectRepository(UserAdmin)
     private userAdminRepository: Repository<UserAdmin>,
-    @InjectRepository(UserWallet)
-    private userWalletRepository: Repository<UserWallet>,
+    @InjectRepository(ListWallet)
+    private listWalletRepository: Repository<ListWallet>,
     private jwtService: JwtService,
   ) {}
 
@@ -291,21 +291,21 @@ export class AdminService implements OnModuleInit {
     page: number = 1,
     limit: number = 100,
     search?: string
-  ): Promise<{ data: UserWallet[]; total: number; page: number; limit: number }> {
+  ): Promise<{ data: ListWallet[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
     
-    const queryBuilder = this.userWalletRepository.createQueryBuilder('wallet')
+    const queryBuilder = this.listWalletRepository.createQueryBuilder('wallet')
       .leftJoinAndSelect('wallet.wallet_auths', 'wallet_auths');
 
     if (search) {
       queryBuilder.where(
-        '(wallet.uw_telegram_id ILIKE :search OR CAST(wallet.uw_id AS TEXT) ILIKE :search)',
+        '(wallet.wallet_nick_name ILIKE :search OR CAST(wallet.wallet_id AS TEXT) ILIKE :search)',
         { search: `%${search}%` }
       );
     }
 
     const [wallets, total] = await queryBuilder
-      .orderBy('wallet.uw_id', 'DESC')
+      .orderBy('wallet.wallet_id', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();
