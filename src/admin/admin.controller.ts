@@ -70,7 +70,6 @@ export class AdminController {
   }
 
   // Setting endpoints
-  @UseGuards(JwtAuthAdminGuard)
   @Get('setting')
   async getSetting(): Promise<Setting> {
     return this.adminService.getSetting();
@@ -160,8 +159,8 @@ export class AdminController {
   @Get('online-stats')
   @ApiOperation({ summary: 'Get online users statistics' })
   @ApiResponse({ status: 200, description: 'Returns online users statistics' })
-  async getOnlineStats() {
-    return this.adminGateway.handleGetOnlineStats();
+  async getOnlineStats(@Request() req) {
+    return this.adminGateway.handleGetOnlineStats(req.user);
   }
 
   @UseGuards(JwtAuthAdminGuard)

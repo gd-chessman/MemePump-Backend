@@ -19,6 +19,7 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
     server: Server;
 
     private readonly logger = new Logger(AdminGateway.name);
+    private readonly ADMIN_KEY = 'ws-admin-key';
     private connectedWallets = new Map<string, {
         walletId: number,
         walletAuth: string,
@@ -28,7 +29,8 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
             os: string,
             device: string
         },
-        ip: string
+        ip: string,
+        isAdmin: boolean
     }>();
 
     constructor(
@@ -41,6 +43,7 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     async handleConnection(client: Socket) {
         try {
+            const keyAdmin = client.handshake.query.keyAdmin;
             const walletId = client.handshake.query.walletId as string;
             const userAgent = client.handshake.headers['user-agent'] || '';
             const ip = client.handshake.address;
@@ -50,6 +53,9 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 os: `${parser.getOS().name} ${parser.getOS().version}`,
                 device: parser.getDevice().type || 'desktop'
             };
+            
+            // Kiểm tra keyAdmin
+            const isAdmin = keyAdmin === this.ADMIN_KEY;
             
             // Nếu có walletId, kiểm tra và thêm vào room tương ứng
             if (walletId) {
@@ -63,7 +69,8 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
                         walletAuth: wallet.wallet_auth,
                         lastActive: Date.now(),
                         device: deviceInfo,
-                        ip: ip
+                        ip: ip,
+                        isAdmin: isAdmin
                     });
                 }
             }
@@ -78,12 +85,13 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     walletAuth: 'guest',
                     lastActive: Date.now(),
                     device: deviceInfo,
-                    ip: ip
+                    ip: ip,
+                    isAdmin: isAdmin
                 });
             }
 
             this.broadcastOnlineStats();
-            this.logger.log(`Client connected: ${client.id}${walletId ? ` (Wallet: ${walletId})` : ''} - ${deviceInfo.browser} on ${deviceInfo.os} from ${ip}`);
+            this.logger.log(`Client connected: ${client.id}${walletId ? ` (Wallet: ${walletId})` : ''} - ${deviceInfo.browser} on ${deviceInfo.os} from ${ip} - Admin: ${isAdmin}`);
         } catch (error) {
             this.logger.error('Connection error:', error);
             client.disconnect();
@@ -93,8 +101,7 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
     handleDisconnect(client: Socket) {
         const wallet = this.connectedWallets.get(client.id);
         if (wallet) {
-            // Leave rooms
-            client.leave(`wallet_${wallet.walletAuth}`);
+            client.leave('all_clients');
         }
         
         this.connectedWallets.delete(client.id);
@@ -112,7 +119,11 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @SubscribeMessage('getOnlineStats')
-    handleGetOnlineStats() {
+    handleGetOnlineStats(client: Socket) {
+        const wallet = this.connectedWallets.get(client.id);
+        if (!wallet || !wallet.isAdmin) {
+            return null;
+        }
         return this.getOnlineStats();
     }
 
@@ -224,7 +235,12 @@ export class AdminGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     private broadcastOnlineStats() {
         const stats = this.getOnlineStats();
-        this.server.emit('onlineStats', stats);
+        // Chỉ gửi cho các client là admin
+        for (const [clientId, data] of this.connectedWallets.entries()) {
+            if (data.isAdmin) {
+                this.server.to(clientId).emit('onlineStats', stats);
+            }
+        }
     }
 
     private cleanupInactiveConnections() {
