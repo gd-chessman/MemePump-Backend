@@ -328,4 +328,15 @@ export class AdminService implements OnModuleInit {
       limit
     };
   }
+
+  async updateWalletAuth(id: number, wallet_auth: 'member' | 'master'): Promise<{ message: string }> {
+    const wallet = await this.listWalletRepository.findOne({ where: { wallet_id: id } });
+    if (!wallet) {
+      throw new NotFoundException(`Wallet with ID ${id} not found`);
+    }
+
+    wallet.wallet_auth = wallet_auth;
+    await this.listWalletRepository.save(wallet);
+    return { message: 'Wallet auth updated successfully' };
+  }
 }

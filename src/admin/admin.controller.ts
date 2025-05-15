@@ -173,4 +173,15 @@ export class AdminController {
   ): Promise<{ data: ListWallet[]; total: number; page: number; limit: number }> {
     return this.adminService.getListWallets(page, limit, search);
   }
+
+  @UseGuards(JwtAuthAdminGuard)
+  @Put('list-wallets/:id/auth')
+  @ApiOperation({ summary: 'Update wallet auth type' })
+  @ApiResponse({ status: 200, description: 'Returns success message' })
+  async updateWalletAuth(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: { wallet_auth: 'member' | 'master' }
+  ): Promise<{ message: string }> {
+    return this.adminService.updateWalletAuth(id, data.wallet_auth);
+  }
 }
