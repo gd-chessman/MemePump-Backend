@@ -94,22 +94,33 @@ export class AdminController {
     },
     @UploadedFile() file: any,
   ): Promise<Setting> {
-    // Get current settings to check for existing logo
-    const currentSettings = await this.adminService.getSetting();
-    
-    // If there's a new file and an old logo exists, delete the old file
-    if (file && currentSettings?.logo) {
-      const oldLogoPath = path.join(process.cwd(), 'public', 'uploads', path.basename(currentSettings.logo));
-      if (fs.existsSync(oldLogoPath)) {
-        fs.unlinkSync(oldLogoPath);
+    try {
+      // Get current settings to check for existing logo
+      const currentSettings = await this.adminService.getSetting();
+      
+      // If there's a new file and an old logo exists, delete the old file
+      if (file && currentSettings?.logo) {
+        const oldLogoPath = path.join(process.cwd(), 'public', 'uploads', path.basename(currentSettings.logo));
+        if (fs.existsSync(oldLogoPath)) {
+          fs.unlinkSync(oldLogoPath);
+        }
       }
-    }
 
-    const updateData = {
-      ...data,
-      logo: file ? `/uploads/${file.filename}` : currentSettings?.logo,
-    };
-    return this.adminService.updateSetting(updateData);
+      const updateData = {
+        ...data,
+        logo: file ? `/uploads/logo${extname(file.originalname)}` : currentSettings?.logo,
+      };
+      return this.adminService.updateSetting(updateData);
+    } catch (error) {
+      // If there's an error and we uploaded a new file, try to delete it
+      if (file) {
+        const newLogoPath = path.join(process.cwd(), 'public', 'uploads', `logo${extname(file.originalname)}`);
+        if (fs.existsSync(newLogoPath)) {
+          fs.unlinkSync(newLogoPath);
+        }
+      }
+      throw error;
+    }
   }
 
   // Category endpoints
