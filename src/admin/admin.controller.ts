@@ -82,8 +82,7 @@ export class AdminController {
       storage: diskStorage({
         destination: './public/uploads',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+          cb(null, `logo${extname(file.originalname)}`);
         },
       }),
     }),
