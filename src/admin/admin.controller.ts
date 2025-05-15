@@ -163,14 +163,14 @@ export class AdminController {
   }
 
   @UseGuards(JwtAuthAdminGuard)
-  @Get('user-wallets')
+  @Get('list-wallets')
   @ApiOperation({ summary: 'Get list of user wallets' })
   @ApiResponse({ status: 200, description: 'Returns list of user wallets with pagination' })
-  async getUserWallets(
+  async getListWallets(
     @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
     @Query('limit', new ParseIntPipe({ optional: true })) limit: number = 100,
     @Query('search') search?: string
   ): Promise<{ data: ListWallet[]; total: number; page: number; limit: number }> {
-    return this.adminService.getUserWallets(page, limit, search);
+    return this.adminService.getListWallets(page, limit, search);
   }
 }

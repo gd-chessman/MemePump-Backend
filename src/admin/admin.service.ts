@@ -287,7 +287,7 @@ export class AdminService implements OnModuleInit {
     return { message: 'Password changed successfully' };
   }
 
-  async getUserWallets(
+  async getListWallets(
     page: number = 1,
     limit: number = 100,
     search?: string
