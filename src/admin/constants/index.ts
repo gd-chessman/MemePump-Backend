@@ -7,6 +7,6 @@ export const DEFAULT_SETTING = {
 export const DEFAULT_USER_ADMIN = {
     username: 'admin',
     password: 'admin123',
-    email: 'admin@memepump.com',
+    email: 'admin@memepump.vip',
     role: 'admin'
 };
