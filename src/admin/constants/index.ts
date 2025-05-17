@@ -1,6 +1,6 @@
 export const DEFAULT_SETTING = {
     appName: 'MemePump',
-    logo: 'https://example.com/default-logo.png',
+    logo: '/uploads/logo.jpg',
     telegramBot: 'https://t.me/memepump_bot'
 };  
 
